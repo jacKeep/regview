@@ -10,19 +10,20 @@ const isValidExpression = ref(true);
 const valueInDifferentFormats = computed(() => {
   // 将二进制数组转换为整数值
   const binaryString = binaryValue.value.join('');
-  const decimalValue = parseInt(binaryString, 2) || 0;
-  
+  // 使用 >>> 0 确保我们得到的是无符号32位整数的数值表示
+  const unsignedDecimalValue = (parseInt(binaryString, 2) || 0) >>> 0;
+
   // 计算有符号整数值 (int32_t)
-  // 首先将32位无符号整数转换为有符号整数
-  let signedValue = decimalValue;
-  if (signedValue & 0x80000000) {  // 如果最高位为1（负数）
-    signedValue = -(~signedValue + 1 & 0xFFFFFFFF);  // 二进制补码转换
-  }
-  
+  // 使用 | 0 将无符号32位整数的位模式解释为有符号32位整数
+  const signedValue = unsignedDecimalValue | 0;
+
   return {
-    Hex: '0x' + decimalValue.toString(16).toUpperCase(),
-    Dec: decimalValue.toString(), // 无符号十进制
-    SignedDec: signedValue.toString(), // 有符号十进制 (int32_t)
+    // 使用无符号值进行十六进制转换
+    Hex: '0x' + unsignedDecimalValue.toString(16).toUpperCase(),
+    // 显示无符号十进制值
+    Dec: unsignedDecimalValue.toString(), // 无符号十进制 (uDec)
+    // 显示有符号十进制值
+    SignedDec: signedValue.toString(), // 有符号十进制 (Dec)
   };
 });
 
